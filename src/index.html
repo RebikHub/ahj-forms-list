@@ -7,7 +7,29 @@
   <title>Document</title>
 </head>
 <body>
-  <div id="popover"></div>
+  <div id="conteiner">
+    <div class="conteiner-header">
+      <h3 class="title">Товары</h3>
+      <span class="add-product"></span>
+    </div>
+    <table id="table-list">
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+  <div id="pop-up" style = 'display: none'>
+      <label for="">
+        <h4>Название</h4>
+        <input type="text" class="input-text">
+      </label>
+      <label for="">
+        <h4>Стоимость</h4>
+        <input type="text" class="input-number">
+      </label>
+      <div class="buttons-save">
+        <button type="button" class="buttons btn-save">Сохранить</button>
+        <button type="button" class="buttons btn-cancel">Отмена</button>
+      </div>
   </div>
 </body>
 </html>

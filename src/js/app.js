@@ -1,7 +1,7 @@
-import Popover from './widget';
+import Widget from './widget';
 
 console.log('app started');
 
-const popover = new Popover();
+const conteiner = new Widget();
 
-popover.renderDom();
+conteiner.renderDom();
