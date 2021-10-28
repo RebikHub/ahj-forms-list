@@ -112,6 +112,36 @@ label > input {
     border-radius: 5px;
 }
 
+#pop-up-delete {
+    flex-wrap: wrap;
+    padding: 10px 10px;
+    position: fixed;
+    left: calc(50vw - 75px);
+    top: 110px;
+    width: 150px;
+    background-color: white;
+    border: 1px solid black;
+    z-index: 1;
+}
+
+#pop-up-delete > h4 {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn {
+    width: 60px;
+}
+
+.btns-delete {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 100%;
+    margin-top: 10px;
+    height: 30px;
+}
+
 
 .error {
     position: absolute;

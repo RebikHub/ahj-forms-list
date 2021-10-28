@@ -10,6 +10,11 @@ export default class Widget {
     this.inputNumber = document.querySelector('.input-number');
     this.buttonSave = document.querySelector('.btn-save');
     this.buttonCancel = document.querySelector('.btn-cancel');
+    this.deletePopup = document.getElementById('pop-up-delete');
+    this.deleteOk = document.querySelector('.btn-delete-ok');
+    this.deleteCancel = document.querySelector('.btn-delete-cancel');
+    this.deleteElement = null;
+    this.editElement = null;
     this.priceNumber = null;
     this.titleText = null;
   }
@@ -67,6 +72,8 @@ export default class Widget {
         elem.appendChild(cloneTdIcons);
       });
     }
+    this.deleteClick();
+    this.editClick();
   }
 
   events() {
@@ -75,16 +82,16 @@ export default class Widget {
     this.inputPrice(this.inputNumber);
     this.saveClick(this.buttonSave);
     this.cancelClick(this.buttonCancel);
-    this.deleteClick();
-    this.editClick();
+    // this.deleteOkOrCancel(this.deleteElement);
+    // this.editOkOrCancel(this.editElement);
   }
 
   addClick(element) {
     element.addEventListener('click', () => {
       if (this.popup.style.display === 'none') {
-        this.popup.style = 'display: flex';
+        this.popup.style.display = 'flex';
       } else {
-        this.popup.style = 'display: none';
+        this.popup.style.display = 'none';
         this.priceNumber = null;
         this.titleText = null;
       }
@@ -130,28 +137,60 @@ export default class Widget {
   }
 
   deleteClick() {
-    const list = document.querySelectorAll('.delete');
-    for (const i of list) {
+    const iconsList = document.querySelectorAll('.delete');
+    for (const i of iconsList) {
       i.addEventListener('click', (e) => {
-        e.target.closest('tr').remove();
-        Memory.saveList();
+        if (e.target.classList.contains('delete')) {
+          this.deleteOkOrCancel(e.target.closest('tr'));
+        }
       });
     }
   }
 
   editClick() {
-    const list = document.querySelectorAll('.edit');
-    for (const i of list) {
+    const editList = document.querySelectorAll('.edit');
+    for (const i of editList) {
       i.addEventListener('click', (e) => {
-        console.log(e.target);
+        if (this.popup.style.display === 'none') {
+          this.popup.style.display = 'flex';
+          this.priceNumber = e.target.closest('tr').dataset.price;
+          this.titleText = e.target.closest('tr').dataset.title;
+          this.inputText.value = e.target.closest('tr').dataset.title;
+          this.inputNumber.value = e.target.closest('tr').dataset.price;
+          Widget.updateListProducts(e.target.closest('tr'));
+        }
       });
+    }
+  }
+
+  deleteOkOrCancel(element) {
+    if (this.deletePopup.style.display === 'none') {
+      this.deletePopup.style.display = 'flex';
+      this.deleteOk.addEventListener('click', () => {
+        this.deletePopup.style.display = 'none';
+        Widget.updateListProducts(element);
+      });
+      this.deleteCancel.addEventListener('click', () => {
+        this.deletePopup.style.display = 'none';
+      });
+    }
+  }
+
+  static updateListProducts(element) {
+    console.log(element);
+    element.remove();
+    const list = Array.from(document.querySelectorAll('.with-data'));
+    Memory.clearStorage();
+    if (list.length !== 0) {
+      for (const key of list) {
+        Memory.saveList(new Product(key.dataset.title, key.dataset.price));
+      }
     }
   }
 
   static saveProduct(title, price) {
     return new Product(title, price);
   }
-
 
   static popError(element) {
     element.focus();

@@ -4,16 +4,21 @@ export default class Memory {
   }
 
   static saveList(product) {
-    const arrayProduct = [];
-    if (localStorage.length !== 0) {
-      const storage = JSON.parse(localStorage.product);
-      storage.push(product);
-      localStorage.setItem('product', JSON.stringify(storage));
-    } else if (!product.length) {
-      arrayProduct.push(product);
-      localStorage.setItem('product', JSON.stringify(arrayProduct));
+    console.log(product);
+    if (product) {
+      const arrayProduct = [];
+      if (localStorage.length !== 0) {
+        const storage = JSON.parse(localStorage.product);
+        storage.push(product);
+        localStorage.setItem('product', JSON.stringify(storage));
+      } else if (!product.length) {
+        arrayProduct.push(product);
+        localStorage.setItem('product', JSON.stringify(arrayProduct));
+      } else if (product.length) {
+        localStorage.setItem('product', JSON.stringify(product));
+      }
     } else {
-      localStorage.setItem('product', JSON.stringify(product));
+      throw new Error('Product is null');
     }
   }
 
@@ -25,7 +30,7 @@ export default class Memory {
     }
   }
 
-  clearStorage() {
-    this.storage.clear();
+  static clearStorage() {
+    localStorage.clear();
   }
 }
