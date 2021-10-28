@@ -13,6 +13,8 @@ export default class Widget {
     this.deletePopup = document.getElementById('pop-up-delete');
     this.deleteOk = document.querySelector('.btn-delete-ok');
     this.deleteCancel = document.querySelector('.btn-delete-cancel');
+    this.iconsList = null;
+    this.editList = null;
     this.deleteElement = null;
     this.editElement = null;
     this.priceNumber = null;
@@ -29,7 +31,6 @@ export default class Widget {
     `;
     this.list.innerHTML = html;
     this.updateDom();
-    this.events();
   }
 
   updateDom() {
@@ -72,6 +73,8 @@ export default class Widget {
         elem.appendChild(cloneTdIcons);
       });
     }
+    this.iconsList = document.querySelectorAll('.delete');
+    this.editList = document.querySelectorAll('.edit');
     this.deleteClick();
     this.editClick();
   }
@@ -82,8 +85,8 @@ export default class Widget {
     this.inputPrice(this.inputNumber);
     this.saveClick(this.buttonSave);
     this.cancelClick(this.buttonCancel);
-    // this.deleteOkOrCancel(this.deleteElement);
-    // this.editOkOrCancel(this.editElement);
+    this.deleteOkClick(this.deleteOk);
+    this.deleteCancelClick(this.deleteCancel);
   }
 
   addClick(element) {
@@ -112,9 +115,12 @@ export default class Widget {
 
   saveClick(element) {
     element.addEventListener('click', () => {
-      Memory.saveList(Widget.saveProduct(this.titleText, this.priceNumber));
+      Memory.saveList(new Product(this.titleText, this.priceNumber));
       if (this.popup.style.display === 'flex') {
         this.popup.style = 'display: none';
+        if (this.editElement !== null) {
+          Widget.updateListProducts(this.editElement);
+        }
         this.priceNumber = null;
         this.titleText = null;
         this.inputText.value = null;
@@ -137,19 +143,32 @@ export default class Widget {
   }
 
   deleteClick() {
-    const iconsList = document.querySelectorAll('.delete');
-    for (const i of iconsList) {
+    for (const i of this.iconsList) {
       i.addEventListener('click', (e) => {
-        if (e.target.classList.contains('delete')) {
-          this.deleteOkOrCancel(e.target.closest('tr'));
+        if (this.deletePopup.style.display === 'none') {
+          this.deletePopup.style.display = 'flex';
+          this.deleteElement = e.target.closest('tr');
         }
       });
     }
   }
 
+  deleteOkClick(element) {
+    element.addEventListener('click', () => {
+      this.deletePopup.style.display = 'none';
+      Widget.updateListProducts(this.deleteElement);
+      this.updateDom();
+    });
+  }
+
+  deleteCancelClick(element) {
+    element.addEventListener('click', () => {
+      this.deletePopup.style.display = 'none';
+    });
+  }
+
   editClick() {
-    const editList = document.querySelectorAll('.edit');
-    for (const i of editList) {
+    for (const i of this.editList) {
       i.addEventListener('click', (e) => {
         if (this.popup.style.display === 'none') {
           this.popup.style.display = 'flex';
@@ -157,39 +176,21 @@ export default class Widget {
           this.titleText = e.target.closest('tr').dataset.title;
           this.inputText.value = e.target.closest('tr').dataset.title;
           this.inputNumber.value = e.target.closest('tr').dataset.price;
-          Widget.updateListProducts(e.target.closest('tr'));
+          this.editElement = e.target.closest('tr');
         }
       });
     }
   }
 
-  deleteOkOrCancel(element) {
-    if (this.deletePopup.style.display === 'none') {
-      this.deletePopup.style.display = 'flex';
-      this.deleteOk.addEventListener('click', () => {
-        this.deletePopup.style.display = 'none';
-        Widget.updateListProducts(element);
-      });
-      this.deleteCancel.addEventListener('click', () => {
-        this.deletePopup.style.display = 'none';
-      });
-    }
-  }
-
   static updateListProducts(element) {
-    console.log(element);
-    element.remove();
-    const list = Array.from(document.querySelectorAll('.with-data'));
-    Memory.clearStorage();
-    if (list.length !== 0) {
-      for (const key of list) {
-        Memory.saveList(new Product(key.dataset.title, key.dataset.price));
+    const list = Memory.loadList();
+    for (let i = 0; i < list.length; i += 1) {
+      if (list[i].title === element.dataset.title && list[i].price === element.dataset.price) {
+        list.splice(i, 1);
       }
     }
-  }
-
-  static saveProduct(title, price) {
-    return new Product(title, price);
+    Memory.clearStorage();
+    Memory.saveList(list);
   }
 
   static popError(element) {

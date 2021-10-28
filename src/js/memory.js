@@ -4,17 +4,16 @@ export default class Memory {
   }
 
   static saveList(product) {
-    console.log(product);
     if (product) {
       const arrayProduct = [];
-      if (localStorage.length !== 0) {
-        const storage = JSON.parse(localStorage.product);
+      if (localStorage.product) {
+        const storage = Array.from(JSON.parse(localStorage.product));
         storage.push(product);
         localStorage.setItem('product', JSON.stringify(storage));
-      } else if (!product.length) {
+      } else if (product.title) {
         arrayProduct.push(product);
         localStorage.setItem('product', JSON.stringify(arrayProduct));
-      } else if (product.length) {
+      } else if (product.length !== 0) {
         localStorage.setItem('product', JSON.stringify(product));
       }
     } else {
