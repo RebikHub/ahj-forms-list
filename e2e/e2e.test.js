@@ -3,7 +3,7 @@ import { fork } from 'child_process';
 
 jest.setTimeout(10000);
 
-describe('Credit Card Validator form', () => {
+describe('input products', () => {
   let browser = null;
   let page = null;
   let server = null;
@@ -33,12 +33,20 @@ describe('Credit Card Validator form', () => {
     server.kill();
   });
 
-  describe('crad validator form', () => {
-    test('should add valid', async () => {
+  describe('valid input', () => {
+    test('should add error-title', async () => {
       await page.goto(baseUrl);
-      const button = await page.$('button');
-      button.click();
-      await page.waitForSelector('.error');
+      await page.click('.add-product');
+      await page.type('.input-text', '');
+      await page.click('.btn-save');
+      await page.waitForSelector('.error-title');
+    });
+    test('should add error-price', async () => {
+      await page.goto(baseUrl);
+      await page.click('.add-product');
+      await page.type('.input-number', '');
+      await page.click('.btn-save');
+      await page.waitForSelector('.error-price');
     });
   });
 });

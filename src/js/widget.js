@@ -20,7 +20,6 @@ export default class Widget {
     this.editElement = null;
     this.priceNumber = null;
     this.titleText = null;
-    this.inputError = null;
   }
 
   renderDom() {
@@ -108,13 +107,12 @@ export default class Widget {
     element.addEventListener('input', (e) => {
       if (validationTitle(e.target.value)) {
         this.titleText = e.target.value;
-        if (document.querySelector('.error-title')) {
+        if (document.querySelector('.error-title') && this.titleText.length) {
           document.querySelector('.error-title').style.display = 'none';
           document.querySelector('.error-title').remove();
         }
       } else {
-        this.inputError = element;
-        Widget.popError(this.inputError, 'title');
+        Widget.popError(element, 'title');
       }
     });
   }
@@ -123,19 +121,27 @@ export default class Widget {
     element.addEventListener('input', (e) => {
       if (validationPrice(e.target.value)) {
         this.priceNumber = Number(e.target.value);
-        if (document.querySelector('.error-price')) {
+        if (document.querySelector('.error-price') && this.priceNumber > 0) {
           document.querySelector('.error-price').style.display = 'none';
           document.querySelector('.error-price').remove();
         }
       } else {
-        this.inputError = element;
-        Widget.popError(this.inputError, 'price');
+        Widget.popError(element, 'price');
       }
     });
   }
 
   saveClick(element) {
     element.addEventListener('click', () => {
+      if (this.titleText === null && this.priceNumber === null) {
+        Widget.popError(document.querySelector('.input-text'), 'title');
+        Widget.popError(document.querySelector('.input-number'), 'price');
+      } else if (!validationTitle(this.titleText)) {
+        Widget.popError(document.querySelector('.input-text'), 'title');
+      } else if (!validationPrice(this.priceNumber)) {
+        Widget.popError(document.querySelector('.input-number'), 'price');
+      }
+
       if (this.titleText !== null && this.priceNumber !== null) {
         Memory.saveList(new Product(this.titleText, this.priceNumber));
 
@@ -150,16 +156,6 @@ export default class Widget {
           this.inputNumber.value = null;
         }
         this.updateDom();
-      } else if (this.inputError === null) {
-        Widget.popError(document.querySelector('.input-text'), 'title');
-        Widget.popError(document.querySelector('.input-number'), 'price');
-      } else {
-        if (this.inputError.classList.contains('input-text')) {
-          Widget.popError(this.inputError, 'title');
-        }
-        if (this.inputError.classList.contains('input-number')) {
-          Widget.popError(this.inputError, 'price');
-        }
       }
     });
   }
