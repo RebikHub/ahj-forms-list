@@ -1,5 +1,6 @@
 import Memory from './memory';
 import Product from './product';
+import { validationTitle, validationPrice } from './valid';
 
 export default class Widget {
   constructor() {
@@ -19,6 +20,7 @@ export default class Widget {
     this.editElement = null;
     this.priceNumber = null;
     this.titleText = null;
+    this.inputError = null;
   }
 
   renderDom() {
@@ -31,6 +33,7 @@ export default class Widget {
     `;
     this.list.innerHTML = html;
     this.updateDom();
+    this.events();
   }
 
   updateDom() {
@@ -103,30 +106,61 @@ export default class Widget {
 
   inputTitle(element) {
     element.addEventListener('input', (e) => {
-      this.titleText = e.target.value;
+      if (validationTitle(e.target.value)) {
+        this.titleText = e.target.value;
+        if (document.querySelector('.error-title')) {
+          document.querySelector('.error-title').style.display = 'none';
+          document.querySelector('.error-title').remove();
+        }
+      } else {
+        this.inputError = element;
+        Widget.popError(this.inputError, 'title');
+      }
     });
   }
 
   inputPrice(element) {
     element.addEventListener('input', (e) => {
-      this.priceNumber = e.target.value;
+      if (validationPrice(e.target.value)) {
+        this.priceNumber = Number(e.target.value);
+        if (document.querySelector('.error-price')) {
+          document.querySelector('.error-price').style.display = 'none';
+          document.querySelector('.error-price').remove();
+        }
+      } else {
+        this.inputError = element;
+        Widget.popError(this.inputError, 'price');
+      }
     });
   }
 
   saveClick(element) {
     element.addEventListener('click', () => {
-      Memory.saveList(new Product(this.titleText, this.priceNumber));
-      if (this.popup.style.display === 'flex') {
-        this.popup.style = 'display: none';
-        if (this.editElement !== null) {
-          Widget.updateListProducts(this.editElement);
+      if (this.titleText !== null && this.priceNumber !== null) {
+        Memory.saveList(new Product(this.titleText, this.priceNumber));
+
+        if (this.popup.style.display === 'flex') {
+          this.popup.style = 'display: none';
+          if (this.editElement !== null) {
+            Widget.updateListProducts(this.editElement);
+          }
+          this.priceNumber = null;
+          this.titleText = null;
+          this.inputText.value = null;
+          this.inputNumber.value = null;
         }
-        this.priceNumber = null;
-        this.titleText = null;
-        this.inputText.value = null;
-        this.inputNumber.value = null;
+        this.updateDom();
+      } else if (this.inputError === null) {
+        Widget.popError(document.querySelector('.input-text'), 'title');
+        Widget.popError(document.querySelector('.input-number'), 'price');
+      } else {
+        if (this.inputError.classList.contains('input-text')) {
+          Widget.popError(this.inputError, 'title');
+        }
+        if (this.inputError.classList.contains('input-number')) {
+          Widget.popError(this.inputError, 'price');
+        }
       }
-      this.updateDom();
     });
   }
 
@@ -138,6 +172,14 @@ export default class Widget {
         this.titleText = null;
         this.inputText.value = null;
         this.inputNumber.value = null;
+      }
+      if (document.querySelector('.error-title')) {
+        document.querySelector('.error-title').style.display = 'none';
+        document.querySelector('.error-title').remove();
+      }
+      if (document.querySelector('.error-price')) {
+        document.querySelector('.error-price').style.display = 'none';
+        document.querySelector('.error-price').remove();
       }
     });
   }
@@ -185,7 +227,7 @@ export default class Widget {
   static updateListProducts(element) {
     const list = Memory.loadList();
     for (let i = 0; i < list.length; i += 1) {
-      if (list[i].title === element.dataset.title && list[i].price === element.dataset.price) {
+      if (list[i].title === element.dataset.title && list[i].price === +element.dataset.price) {
         list.splice(i, 1);
       }
     }
@@ -193,21 +235,14 @@ export default class Widget {
     Memory.saveList(list);
   }
 
-  static popError(element) {
-    element.focus();
-    const error = document.createElement('div');
-    const text = document.createElement('p');
-    const title = document.createElement('h4');
-    const arrow = document.createElement('div');
-    title.textContent = 'Popover title';
-    text.textContent = 'And heres some amazing content. Its very engaging. Right?';
-    error.appendChild(title);
-    error.appendChild(text);
-    error.appendChild(arrow);
-    arrow.className = 'arrow';
-    error.className = 'error';
-    element.offsetParent.appendChild(error);
-    error.style.top = `${element.offsetTop - error.offsetHeight - arrow.offsetHeight}px`;
-    error.style.left = `${element.offsetLeft - (error.offsetWidth - element.offsetWidth) / 2}px`;
+  static popError(element, input) {
+    if (element && !document.querySelector(`.error-${input}`)) {
+      const error = document.createElement('div');
+      error.textContent = `Error ${input}`;
+      error.className = `error-${input}`;
+      element.offsetParent.appendChild(error);
+      error.style.top = `${element.offsetTop + error.offsetHeight}px`;
+      error.style.left = `${element.offsetLeft}px`;
+    }
   }
 }
